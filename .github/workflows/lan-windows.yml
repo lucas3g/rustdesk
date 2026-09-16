@@ -4,6 +4,8 @@ name: Build Windows (LAN test)
 
 on:
   workflow_dispatch:
+  push:
+    branches: [lan-test]
 
 env:
   RUST_VERSION: "1.75"
