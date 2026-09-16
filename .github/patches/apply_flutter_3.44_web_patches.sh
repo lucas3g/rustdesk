@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Prepares a web build on Flutter 3.44.x. Companion to
+# Prepares a web build on Flutter 3.44 or newer. Companion to
 # apply_flutter_3.44_source_patches.sh (which it runs first): the web target
 # additionally needs qr_code_scanner's web implementation patched for the
 # dart:ui platformViewRegistry removal, and flutter/web/fonts refreshed with
 # the font paths the 3.44 engine requests for offline/air-gapped support
 # (rustdesk-server-pro#996; see flutter/web/fonts/sync_fonts.py).
 #
-# Run from the repository root with Flutter 3.44.x on PATH, then build:
+# Run from the repository root with Flutter >= 3.44 on PATH, then build:
 #   bash .github/patches/apply_flutter_3.44_web_patches.sh
 #   (cd flutter && flutter build web --release)   # or ./web/js/flutter_build.py
 #
@@ -14,13 +14,17 @@
 #   git checkout -- flutter/lib/common.dart flutter/pubspec.yaml flutter/pubspec.lock
 set -euo pipefail
 
-flutter --version | grep -q "Flutter 3\.44\." || {
-  echo "Flutter 3.44.x must be on PATH; found:" >&2
+readonly MIN_FLUTTER_VERSION="3.44.0"
+flutter_version="$(flutter --version | sed -n 's/^Flutter \([0-9.]*\).*/\1/p' | head -n1)"
+if [[ -z "$flutter_version" ]] ||
+  [[ "$(printf '%s\n%s\n' "$MIN_FLUTTER_VERSION" "$flutter_version" | sort -V | head -n1)" != "$MIN_FLUTTER_VERSION" ]]; then
+  echo "Flutter $MIN_FLUTTER_VERSION or newer must be on PATH; found:" >&2
   flutter --version | grep "^Flutter" >&2 || true
   exit 1
-}
+fi
 
-# Shared 3.44 source/pubspec patches own their complete-state validation.
+# Shared source/pubspec patches own their complete-state validation; they are a no-op
+# now that the committed sources already target modern Flutter.
 bash .github/patches/apply_flutter_3.44_source_patches.sh
 
 # Populate the pub cache with the 3.44 dependency resolution.

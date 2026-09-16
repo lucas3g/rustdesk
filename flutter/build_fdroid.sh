@@ -40,7 +40,9 @@ prepare_flutter() {
 
 	# Patch flutter
 
-	if dpkg --compare-versions "${VERSION}" ge "3.24.4"; then
+	# Upstream carries this DropdownMenu fix since 3.44, where the patch no longer applies.
+	if dpkg --compare-versions "${VERSION}" ge "3.24.4" &&
+		dpkg --compare-versions "${VERSION}" lt "3.44.0"; then
 		git apply "${ROOTDIR}/.github/patches/flutter_3.24.4_dropdown_menu_enableFilter.diff"
 	fi
 

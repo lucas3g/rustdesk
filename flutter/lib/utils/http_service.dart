@@ -81,8 +81,6 @@ class HttpService {
               .delete(url, headers: headers, body: body)
               .timeout(_requestTimeout);
           break;
-        default:
-          throw Exception('Unsupported HTTP method');
       }
 
       return response;

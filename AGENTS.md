@@ -34,6 +34,30 @@ workspace member. `base::config::keys` re-exports the handful of keys
   - Mobile: `flutter/lib/mobile/`
   - Shared: `flutter/lib/common/` and `flutter/lib/models/`
 
+## Flutter Toolchain (FVM)
+
+* The pinned SDK is **Flutter 3.47.2** (stable, Dart 3.13.2), managed by
+  [fvm](https://fvm.app); `flutter/.fvmrc` records it.
+* Always run the tooling through fvm from inside `flutter/`: `fvm flutter pub get`,
+  `fvm flutter analyze`, `fvm flutter run`, `fvm dart ...`. A bare `flutter` may resolve
+  to another SDK.
+* The committed sources already use the modern Flutter APIs (`DialogThemeData`,
+  `TabBarThemeData`, `extended_text: 15.0.2`, `google_fonts: ^8.1.0`), so
+  `.github/patches/apply_flutter_3.44_source_patches.sh` detects that state and is a
+  no-op. CI (`flutter-build.yml`, `bridge.yml`) is on the same 3.47.2; keep those
+  versions in sync with `.fvmrc`.
+* `.github/patches/flutter_3.24.4_dropdown_menu_enableFilter.diff` is not needed on
+  3.47.2 -- that `DropdownMenu` fix is upstream since 3.44. The workflow steps that
+  apply it are gated on `FLUTTER_VERSION == 3.24.5` and stay inert.
+* Two CI targets are knowingly left behind: Windows 7 (its custom x64 engine only
+  matches the 3.24 engine, so that step is now skipped) and Linux arm64 (sony/flutter-elinux
+  has no tag past 3.27.1, below the Flutter >= 3.35 the pubspec needs).
+* `playground.yml` is deliberately left on its old SDKs -- it exists to reproduce
+  builds on pinned historical Flutter versions.
+* `flutter/lib/generated_bridge.dart` is not versioned; without it `analyze` reports
+  `RustdeskImpl` / `EventToUI` as undefined. Generate it with `flutter/run.sh`
+  (flutter_rust_bridge_codegen 1.80.1).
+
 ## Rust Rules
 
 * Avoid `unwrap()` / `expect()` in production code.
